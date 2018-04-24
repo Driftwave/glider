@@ -1,0 +1,48 @@
+{
+  "name": "glider",
+  "version": "0.1.0",
+  "private": true,
+  "proxy": "http://localhost:3001",
+  "dependencies": {
+    "@blueprintjs/core": "^2.2.0",
+    "flow-bin": "^0.70.0",
+    "immutable": "^3.8.2",
+    "react": "^16.3.2",
+    "react-dom": "^16.3.2",
+    "react-redux": "^5.0.7",
+    "react-scripts": "1.1.4",
+    "react-transition-group": "^2.2.1",
+    "react-virtualized": "^9.18.5",
+    "redux": "3.7.2",
+    "redux-devtools-extension": "^2.13.2",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.2.0",
+    "reselect": "^3.0.1"
+  },
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "./src/server/run.py",
+    "client": "react-scripts start",
+    "build": "react-scripts build",
+    "flow": "flow",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "@types/react": "^16.3.12",
+    "@types/react-dom": "^16.0.5",
+    "@types/react-transition-group": "^2.0.8",
+    "babel-eslint": "^8.1.1",
+    "concurrently": "^3.5.1",
+    "eslint": "^4.19.1",
+    "eslint-config-react-app": "^2.1.0",
+    "eslint-plugin-flowtype": "^2.46.3",
+    "eslint-plugin-import": "^2.11.0",
+    "eslint-plugin-jsx-a11y": "^5.1.1",
+    "eslint-plugin-prettier": "^2.6.0",
+    "eslint-plugin-react": "^7.7.0",
+    "husky": "^0.14.3",
+    "prettier": "^1.12.1",
+    "pretty-quick": "^1.4.1"
+  }
+}
