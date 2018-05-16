@@ -1,9 +1,9 @@
-import * as React from "react";
-import { connect } from "react-redux";
-import { Tabs, Tab } from "@blueprintjs/core";
-import { panelIds } from "../containers/Panels";
-import { getActivePanel } from "../selectors";
-import { switchPanel } from "../actions";
+import * as React from 'react'
+import { connect } from 'react-redux'
+import { Tabs, Tab } from '@blueprintjs/core'
+import { panelIds } from '../containers/Panels'
+import { getActivePanel } from '../selectors'
+import { switchPanel } from '../actions'
 
 const TabsComponent = ({ activePanel, switchPanel }) => (
   <Tabs selectedTabId={activePanel} onChange={switchPanel}>
@@ -15,9 +15,9 @@ const TabsComponent = ({ activePanel, switchPanel }) => (
     <Tab title={panelIds.POS_LABEL} id={panelIds.POS_LABEL} />
     <Tab title={panelIds.NEG_LABEL} id={panelIds.NEG_LABEL} />
   </Tabs>
-);
+)
 
 export default connect(
   state => ({ activePanel: getActivePanel(state) }),
-  dispatch => ({ switchPanel: panelId => dispatch(switchPanel(panelId)) })
-)(TabsComponent);
+  dispatch => ({ switchPanel: panelId => dispatch(switchPanel(panelId)) }),
+)(TabsComponent)

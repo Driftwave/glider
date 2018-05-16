@@ -1,6 +1,6 @@
-import { Alignment, Button, Navbar } from "@blueprintjs/core";
-import * as React from "react";
-import TabsComponent from "../containers/Tabs";
+import { Alignment, Button, Navbar } from '@blueprintjs/core'
+import * as React from 'react'
+import TabsComponent from '../containers/Tabs'
 
 const NavbarComponent = () => (
   <Navbar>
@@ -13,6 +13,6 @@ const NavbarComponent = () => (
       <TabsComponent />
     </Navbar.Group>
   </Navbar>
-);
+)
 
-export default NavbarComponent;
+export default NavbarComponent
