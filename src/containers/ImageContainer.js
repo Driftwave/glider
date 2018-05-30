@@ -1,80 +1,143 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { ContextMenuTarget, Menu, MenuItem, MenuDivider } from '@blueprintjs/core'
+import { Colors, ContextMenuTarget, Menu, MenuItem, MenuDivider } from '@blueprintjs/core'
+import { OrderedSet } from 'immutable'
 import Checkmark from '../components/Checkmark'
-import { labelImages, unlabelImages } from '../actions'
-import { getImageProbGetter, getPosLabelImageSet, getNegLabelImageSet } from '../selectors'
 
-const regImgStyle = {
+import {
+  labelImages,
+  labelSelectedPos,
+  labelSelectedNeg,
+  labelSelectedUnk,
+  unlabelSelected,
+  toggleSelected,
+  unlabelImages,
+} from '../actions'
+
+import {
+  getImageProbGetter,
+  getPosLabelSet,
+  getNegLabelSet,
+  getUnkLabelSet,
+  getSelectedImageSet,
+} from '../selectors'
+
+const selectColor = Colors.ORANGE3
+const posCheckColor = Colors.BLUE3
+const negCheckColor = Colors.RED3
+
+const imageStyle = {
   width: '100%',
   height: '100%',
   objectFit: 'contain',
   display: 'block',
+}
+const shrinkStyle = {
+  transform: 'translateZ(0px) scale3d(0.93, 0.93, 1)',
   transition: 'transform .135s cubic-bezier(0.0,0.0,0.2,1),opacity linear .15s',
 }
-const backImgStyle = {
-  width: '100%',
-  height: '100%',
-  objectFit: 'contain',
-  display: 'block',
-  transform: 'translateZ(0px) scale3d(0.85, 0.85, 1)',
-  transition: 'transform .135s cubic-bezier(0.0,0.0,0.2,1),opacity linear .15s',
-}
-const imgDivStyle = {
-  margin: 1.5,
-  backgroundColor: '#48AFF0',
+const imageDivStyle = {
+  margin: 1.7,
   cursor: 'pointer',
+  background: selectColor,
 }
+// const hoverColor = '#FFE39F'
+// <style>{`.img-div:hover{outline:2px solid ${hoverColor}}`}</style>
 
 class ImageComponent extends React.PureComponent {
+  handleClick = e => {
+    const { toggleSelected, shiftToggleSelected } = this.props
+    if (e.shiftKey) shiftToggleSelected()
+    else toggleSelected()
+  }
+
   render() {
-    const { pos, neg, imageUrl } = this.props
-    const labeled = pos | neg
-    const imgStyle = Object.assign({}, labeled ? backImgStyle : regImgStyle)
+    const { isPos, isNeg, isSelected, imageUrl } = this.props
+    const imgStyle = Object.assign({}, imageStyle, isSelected ? shrinkStyle : null)
+    const divStyle = Object.assign({}, imageDivStyle)
+    if (isSelected) {
+      divStyle.outlineStyle = 'solid'
+      divStyle.outlineColor = selectColor
+      divStyle.outlineWidth = 2
+    }
     return (
-      <div style={imgDivStyle} className="img-div">
-        <Checkmark pos={pos} neg={neg} />
+      <div style={divStyle} className="img-div" onClick={this.handleClick}>
+        {isPos | isNeg ? <Checkmark color={isPos ? posCheckColor : negCheckColor} /> : null}
         <img style={imgStyle} alt={''} src={imageUrl} />
-        <style>{`.img-div:hover{outline:3px solid #06befa}`}</style>
       </div>
     )
   }
   renderContextMenu() {
-    const { imageId, prob, pos, neg, labelPos, labelNeg, unlabel } = this.props
+    const {
+      imageId,
+      prob,
+      isPos,
+      isNeg,
+      isUnk,
+      isSelected,
+      labelPos,
+      labelNeg,
+      labelUnk,
+      labelSelectedPos,
+      labelSelectedNeg,
+      labelSelectedUnk,
+      unlabelSelected,
+      unlabel,
+    } = this.props
     const menuItems = []
-    if (pos) {
-      menuItems.push(<MenuItem onClick={unlabel} text="Remove label" />)
-      menuItems.push(<MenuItem onClick={labelNeg} text="Relabel Negative" />)
-    } else if (neg) {
-      menuItems.push(<MenuItem onClick={unlabel} text="Remove label" />)
-      menuItems.push(<MenuItem onClick={labelPos} text="Relabel Positive" />)
+    if (isPos) {
+      menuItems.push(<MenuItem onClick={unlabel} text="Unmark" />)
+      menuItems.push(<MenuItem onClick={labelNeg} text="Re-mark Negative" />)
+      menuItems.push(<MenuItem onClick={labelUnk} text="Re-mark Uncertain" />)
+    } else if (isNeg) {
+      menuItems.push(<MenuItem onClick={unlabel} text="Unmark" />)
+      menuItems.push(<MenuItem onClick={labelPos} text="Mark Positive" />)
+      menuItems.push(<MenuItem onClick={labelUnk} text="Mark Uncertain" />)
+    } else if (isUnk) {
+      menuItems.push(<MenuItem onClick={unlabel} text="Unmark" />)
+      menuItems.push(<MenuItem onClick={labelPos} text="Mark Positive" />)
+      menuItems.push(<MenuItem onClick={labelNeg} text="Mark Negative" />)
     } else {
-      menuItems.push(<MenuItem onClick={labelPos} text="Label Positive" />)
-      menuItems.push(<MenuItem onClick={labelNeg} text="Label Negative" />)
+      menuItems.push(<MenuItem onClick={labelPos} text="Mark Positive" />)
+      menuItems.push(<MenuItem onClick={labelNeg} text="Mark Negative" />)
+      menuItems.push(<MenuItem onClick={labelUnk} text="Mark Uncertain" />)
     }
     menuItems.push(<MenuDivider />)
+    if (isSelected) {
+      menuItems.push(<MenuItem onClick={labelSelectedPos} text="Mark Selected Positive" />)
+      menuItems.push(<MenuItem onClick={labelSelectedNeg} text="Mark Selected Negative" />)
+      menuItems.push(<MenuItem onClick={labelSelectedUnk} text="Mark Selected Uncertain" />)
+      menuItems.push(<MenuItem onClick={unlabelSelected} text="Unmark Selected" />)
+      menuItems.push(<MenuDivider />)
+    }
     menuItems.push(<MenuItem disabled={true} text={`ImageId: ${imageId}`} />)
     menuItems.push(<MenuItem disabled={true} text={`Probability: ${prob}`} />)
     return <Menu> {menuItems} </Menu>
   }
 }
 
-const mapStateToProps = (state, ownProps) => {
-  const img = ownProps.imageId
-  const getProb = getImageProbGetter(state)
-  const posImages = getPosLabelImageSet(state)
-  const negImages = getNegLabelImageSet(state)
-  return {
-    pos: posImages.contains(img),
-    neg: negImages.contains(img),
-    prob: getProb(img),
-  }
-}
+const mapStateToProps = (state, ownProps) => ({
+  isPos: getPosLabelSet(state).contains(ownProps.imageId),
+  isNeg: getNegLabelSet(state).contains(ownProps.imageId),
+  isUnk: getUnkLabelSet(state).contains(ownProps.imageId),
+  prob: getImageProbGetter(state)(ownProps.imageId),
+  isSelected: getSelectedImageSet(state).contains(ownProps.imageId),
+})
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  labelPos: () => dispatch(labelImages([ownProps.imageId], [])),
-  labelNeg: () => dispatch(labelImages([], [ownProps.imageId])),
+  labelPos: () => dispatch(labelImages([ownProps.imageId], [], [])),
+  labelNeg: () => dispatch(labelImages([], [ownProps.imageId], [])),
+  labelUnk: () => dispatch(labelImages([], [], [ownProps.imageId])),
   unlabel: () => dispatch(unlabelImages([ownProps.imageId])),
+  toggleSelected: () => dispatch(toggleSelected([ownProps.imageId])),
+  shiftToggleSelected: () => {
+    const imageIds = OrderedSet(ownProps.imageIds.slice(0, ownProps.index + 1))
+    dispatch(toggleSelected(imageIds))
+  },
+  labelSelectedPos: () => dispatch(labelSelectedPos()),
+  labelSelectedNeg: () => dispatch(labelSelectedNeg()),
+  labelSelectedUnk: () => dispatch(labelSelectedUnk()),
+  unlabelSelected: () => dispatch(unlabelSelected()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ContextMenuTarget(ImageComponent))
