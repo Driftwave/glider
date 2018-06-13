@@ -2,29 +2,33 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { Button, MenuItem } from '@blueprintjs/core'
 import { Select } from '@blueprintjs/select'
-import { setFeatureType, fetchProbs } from '../actions'
-import { getFeatureType } from '../selectors'
+import { setActiveFeatureType } from '../actions'
+import { getActiveFeatureType, getFeatureTypes } from '../selectors'
 
-const featureTypes = ['inception_v3', 'nasnet_large']
-
-const FeatureTypeSelect = ({ setFeatureType, featureType }) => (
+const FeatureTypeSelect = ({ setActiveFeatureType, activeFeatureType, featureTypes }) => (
 	<Select
 		filterable={false}
 		items={featureTypes}
 		itemRenderer={(item, { handleClick, modifiers }) => (
-			<MenuItem active={modifiers.active} key={item} text={item} onClick={handleClick} />
+			<MenuItem
+				active={item === activeFeatureType}
+				key={item}
+				text={item}
+				onClick={handleClick}
+			/>
 		)}
-		onItemSelect={value => setFeatureType(value)}
+		onItemSelect={value => setActiveFeatureType(value)}
 	>
-		Feature Type: <Button rightIcon="caret-down" text={featureType} />
+		Feature Type: <Button rightIcon="caret-down" text={activeFeatureType} />
 	</Select>
 )
 
 const mapStateToProps = state => ({
-	featureType: getFeatureType(state),
+	activeFeatureType: getActiveFeatureType(state),
+	featureTypes: getFeatureTypes(state),
 })
 const mapDispatchToProps = dispatch => ({
-	setFeatureType: value => dispatch(setFeatureType(value)),
+	setActiveFeatureType: value => dispatch(setActiveFeatureType(value)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(FeatureTypeSelect)

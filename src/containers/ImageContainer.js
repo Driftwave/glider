@@ -12,6 +12,8 @@ import {
   unlabelSelected,
   toggleSelected,
   unlabelImages,
+  labelPosFlipSelected,
+  labelNegFlipSelected,
 } from '../actions'
 
 import {
@@ -51,6 +53,7 @@ class ImageComponent extends React.PureComponent {
     else toggleSelected()
   }
 
+  // {isPos | isNeg ? <Checkmark color={isPos ? posCheckColor : negCheckColor} /> : null}
   render() {
     const { isPos, isNeg, isSelected, imageUrl } = this.props
     const imgStyle = Object.assign({}, imageStyle, isSelected ? shrinkStyle : null)
@@ -62,7 +65,6 @@ class ImageComponent extends React.PureComponent {
     }
     return (
       <div style={divStyle} className="img-div" onClick={this.handleClick}>
-        {isPos | isNeg ? <Checkmark color={isPos ? posCheckColor : negCheckColor} /> : null}
         <img style={imgStyle} alt={''} src={imageUrl} />
       </div>
     )
@@ -75,6 +77,7 @@ class ImageComponent extends React.PureComponent {
       isNeg,
       isUnk,
       isSelected,
+      someSelected,
       labelPos,
       labelNeg,
       labelUnk,
@@ -83,6 +86,8 @@ class ImageComponent extends React.PureComponent {
       labelSelectedUnk,
       unlabelSelected,
       unlabel,
+      labelPosToHere,
+      labelNegToHere,
     } = this.props
     const menuItems = []
     if (isPos) {
@@ -103,13 +108,20 @@ class ImageComponent extends React.PureComponent {
       menuItems.push(<MenuItem onClick={labelUnk} text="Mark Uncertain" />)
     }
     menuItems.push(<MenuDivider />)
-    if (isSelected) {
+    if (someSelected) {
       menuItems.push(<MenuItem onClick={labelSelectedPos} text="Mark Selected Positive" />)
       menuItems.push(<MenuItem onClick={labelSelectedNeg} text="Mark Selected Negative" />)
       menuItems.push(<MenuItem onClick={labelSelectedUnk} text="Mark Selected Uncertain" />)
       menuItems.push(<MenuItem onClick={unlabelSelected} text="Unmark Selected" />)
       menuItems.push(<MenuDivider />)
+      menuItems.push(
+        <MenuItem onClick={labelNegToHere} text="Mark Selected Positive (rest to here Negative)" />,
+      )
+      menuItems.push(
+        <MenuItem onClick={labelPosToHere} text="Mark Selected Negative (rest to here Positive)" />,
+      )
     }
+    menuItems.push(<MenuDivider />)
     menuItems.push(<MenuItem disabled={true} text={`ImageId: ${imageId}`} />)
     menuItems.push(<MenuItem disabled={true} text={`Probability: ${prob}`} />)
     return <Menu> {menuItems} </Menu>
@@ -122,22 +134,25 @@ const mapStateToProps = (state, ownProps) => ({
   isUnk: getUnkLabelSet(state).contains(ownProps.imageId),
   prob: getImageProbGetter(state)(ownProps.imageId),
   isSelected: getSelectedImageSet(state).contains(ownProps.imageId),
+  someSelected: getSelectedImageSet(state).size > 0,
 })
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
-  labelPos: () => dispatch(labelImages([ownProps.imageId], [], [])),
-  labelNeg: () => dispatch(labelImages([], [ownProps.imageId], [])),
-  labelUnk: () => dispatch(labelImages([], [], [ownProps.imageId])),
-  unlabel: () => dispatch(unlabelImages([ownProps.imageId])),
-  toggleSelected: () => dispatch(toggleSelected([ownProps.imageId])),
-  shiftToggleSelected: () => {
-    const imageIds = OrderedSet(ownProps.imageIds.slice(0, ownProps.index + 1))
-    dispatch(toggleSelected(imageIds))
-  },
-  labelSelectedPos: () => dispatch(labelSelectedPos()),
-  labelSelectedNeg: () => dispatch(labelSelectedNeg()),
-  labelSelectedUnk: () => dispatch(labelSelectedUnk()),
-  unlabelSelected: () => dispatch(unlabelSelected()),
-})
+const mapDispatchToProps = (dispatch, ownProps) => {
+  const imageSetToHere = OrderedSet(ownProps.imageIds.slice(0, ownProps.index + 1))
+  return {
+    labelPos: () => dispatch(labelImages([ownProps.imageId], [], [])),
+    labelNeg: () => dispatch(labelImages([], [ownProps.imageId], [])),
+    labelUnk: () => dispatch(labelImages([], [], [ownProps.imageId])),
+    unlabel: () => dispatch(unlabelImages([ownProps.imageId])),
+    toggleSelected: () => dispatch(toggleSelected([ownProps.imageId])),
+    shiftToggleSelected: () => dispatch(toggleSelected(imageSetToHere)),
+    labelSelectedPos: () => dispatch(labelSelectedPos()),
+    labelSelectedNeg: () => dispatch(labelSelectedNeg()),
+    labelSelectedUnk: () => dispatch(labelSelectedUnk()),
+    unlabelSelected: () => dispatch(unlabelSelected()),
+    labelPosToHere: () => dispatch(labelPosFlipSelected(imageSetToHere)),
+    labelNegToHere: () => dispatch(labelNegFlipSelected(imageSetToHere)),
+  }
+}
 
 export default connect(mapStateToProps, mapDispatchToProps)(ContextMenuTarget(ImageComponent))

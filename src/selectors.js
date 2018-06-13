@@ -17,8 +17,11 @@ export const getPosLabelSet = state => state.labels.pos
 export const getNegLabelSet = state => state.labels.neg
 export const getUnkLabelSet = state => state.labels.unk
 export const getThresholds = state => state.thresholds
-export const getFeatureType = state => state.featureType
+export const getActiveFeatureType = state => state.featureTypes.active
+export const getFeatureTypes = state => state.featureTypes.all
 export const getCollectionId = state => state.collection.id
+export const getUser = state => state.authentication.user
+export const isFetchingProbs = state => state.probabilities.isFetching
 
 export const getImageProbGetter = createSelector([getImages, getImageProbs], (images, probs) => {
   const probsMap = {}
@@ -31,6 +34,11 @@ export const getLabeledSet = createSelector(
   (posLabeled, negLabeled, unkLabeled) => posLabeled.union(negLabeled).union(unkLabeled),
 )
 
+const sortAscending = (arr, score) => arr.sort((a, b) => score(a) - score(b))
+const sortDescending = (arr, score) => arr.sort((a, b) => score(b) - score(a))
+const sortUncertain = (arr, score) =>
+  arr.sort((a, b) => Math.abs(0.5 - score(a)) - Math.abs(0.5 - score(b)))
+
 export const getPosProbImages = createSelector(
   [getImages, getImageProbGetter, getLabeledSet, getThresholds],
   (images, getProb, labeled, thresholds) => {
@@ -39,7 +47,7 @@ export const getPosProbImages = createSelector(
       const prob = getProb(img)
       return prob === undefined || prob > thresholds[1]
     })
-    res.sort((a, b) => getProb(b) - getProb(a))
+    sortDescending(res, getProb)
     return res
   },
 )
@@ -52,7 +60,7 @@ export const getNegProbImages = createSelector(
       const prob = getProb(img)
       return prob < thresholds[0]
     })
-    res.sort((a, b) => getProb(a) - getProb(b))
+    sortAscending(res, getProb)
     return res
   },
 )
@@ -65,7 +73,34 @@ export const getUncertainImages = createSelector(
       const prob = getProb(img)
       return prob >= thresholds[0] && prob <= thresholds[1]
     })
-    res.sort((a, b) => Math.abs(0.5 - getProb(a)) - Math.abs(0.5 - getProb(b)))
+    sortUncertain(res, getProb)
+    return res
+  },
+)
+
+export const getPosLabelImages = createSelector(
+  [getPosLabelSet, getImageProbGetter],
+  (posLabelSet, getProb) => {
+    const res = posLabelSet.toArray()
+    sortAscending(res, getProb)
+    return res
+  },
+)
+
+export const getNegLabelImages = createSelector(
+  [getNegLabelSet, getImageProbGetter],
+  (negLabelSet, getProb) => {
+    const res = negLabelSet.toArray()
+    sortDescending(res, getProb)
+    return res
+  },
+)
+
+export const getUnkLabelImages = createSelector(
+  [getUnkLabelSet, getImageProbGetter],
+  (unkLabelSet, getProb) => {
+    const res = unkLabelSet.toArray()
+    sortDescending(res, getProb)
     return res
   },
 )
@@ -75,18 +110,18 @@ export const getActiveImages = createSelector(
     getPosProbImages,
     getNegProbImages,
     getUncertainImages,
-    getPosLabelSet,
-    getNegLabelSet,
-    getUnkLabelSet,
+    getPosLabelImages,
+    getNegLabelImages,
+    getUnkLabelImages,
     getActivePanelId,
   ],
   (
     posProbImages,
     negProbImages,
     uncertainImages,
-    posLabelSet,
-    negLabelSet,
-    unkLabelSet,
+    posLabelImages,
+    negLabelImages,
+    unkLabelImages,
     panelId,
   ) => {
     switch (panelId) {
@@ -97,11 +132,11 @@ export const getActiveImages = createSelector(
       case NEG_PROBS:
         return negProbImages
       case POS_LABEL:
-        return posLabelSet.toArray()
+        return posLabelImages
       case NEG_LABEL:
-        return negLabelSet.toArray()
+        return negLabelImages
       case UNK_LABEL:
-        return unkLabelSet.toArray()
+        return unkLabelImages
       default:
         return []
     }
