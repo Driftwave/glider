@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { Button, Intent } from '@blueprintjs/core'
-import { saveTagData } from '../actions'
+import { saveTagData } from '../actionCreators'
 import { getUser } from '../selectors'
 
 class TagSave extends React.Component {

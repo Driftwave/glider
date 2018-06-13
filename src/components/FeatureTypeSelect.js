@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { Button, MenuItem } from '@blueprintjs/core'
 import { Select } from '@blueprintjs/select'
-import { setActiveFeatureType } from '../actions'
+import { setActiveFeatureType } from '../actionCreators'
 import { getActiveFeatureType, getFeatureTypes } from '../selectors'
 
 const FeatureTypeSelect = ({ setActiveFeatureType, activeFeatureType, featureTypes }) => (

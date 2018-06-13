@@ -1,4 +1,5 @@
 import { Intent } from '@blueprintjs/core'
+import * as types from './constants/actionTypes'
 import {
   getPosLabelSet,
   getNegLabelSet,
@@ -7,65 +8,52 @@ import {
   getCollectionId,
   getActiveFeatureType,
 } from './selectors'
-
 import { AppToaster } from './toaster'
 
-export const INIT_APPLICATION = 'INIT_APPLICATION'
-export const SWITCH_PANEL = 'SWITCH_PANEL'
-export const REQUEST_COLLECTION = 'REQUEST_COLLECTION'
-export const RECEIVE_COLLECTION = 'RECEIVE_COLLECTION'
-export const LABEL_IMAGES = 'LABEL_IMAGES'
-export const UNLABEL_IMAGES = 'UNLABEL_IMAGES'
-export const REQUEST_PROBS = 'REQUEST_PROBS'
-export const RECEIVE_PROBS = 'RECEIVE_PROBS'
-export const RESET_PROBS = 'RESET_PROBS'
-export const TOGGLE_SELECTED = 'TOGGLE_SELECTED'
-export const CLEAR_SELECTED = 'CLEAR_SELECTED'
-export const INCREASE_IMAGE_SIZE = 'INCREASE_IMAGE_SIZE'
-export const DECREASE_IMAGE_SIZE = 'DECREASE_IMAGE_SIZE'
-export const SET_THRESHOLDS = 'SET_THRESHOLDS'
-export const SET_ACTIVE_FEATURE_TYPE = 'SET_ACTIVE_FEATURE_TYPE'
-export const RECEIVE_FEATURE_TYPES = 'RECEIVE_FEATURE_TYPES'
-export const REQUEST_FEATURE_TYPES = 'REQUEST_FEATURE_TYPES'
-export const REQUEST_TAG_DATA = 'REQUEST_TAG_DATA'
-export const RECEIVE_TAG_DATA = 'RECEIVE_TAG_DATA'
+export const openDialog = value => ({
+  type: types.OPEN_DIALOG,
+  value,
+})
+export const closeDialog = value => ({
+  type: types.CLOSE_DIALOG,
+  value,
+})
 
 export const setThresholds = value => ({
-  type: SET_THRESHOLDS,
+  type: types.SET_THRESHOLDS,
   value,
 })
 
 export const increaseImageSize = () => ({
-  type: INCREASE_IMAGE_SIZE,
+  type: types.INCREASE_IMAGE_SIZE,
 })
 
 export const decreaseImageSize = () => ({
-  type: DECREASE_IMAGE_SIZE,
+  type: types.DECREASE_IMAGE_SIZE,
 })
 
 export const clearSelected = () => ({
-  type: CLEAR_SELECTED,
+  type: types.CLEAR_SELECTED,
 })
 
 export const toggleSelected = imageIds => ({
-  type: TOGGLE_SELECTED,
+  type: types.TOGGLE_SELECTED,
   imageIds,
 })
 
-export const switchPanel = id => ({
-  type: SWITCH_PANEL,
-  id,
+export const switchPanel = value => ({
+  type: types.SWITCH_PANEL,
+  value,
 })
 
 export const requestCollection = id => ({
-  type: REQUEST_COLLECTION,
+  type: types.REQUEST_COLLECTION,
   id,
 })
 
 export const receiveCollection = (id, imageIds) => ({
-  type: RECEIVE_COLLECTION,
-  id,
-  imageIds,
+  type: types.RECEIVE_COLLECTION,
+  payload: { id, imageIds },
   receivedAt: Date.now(),
 })
 
@@ -77,16 +65,16 @@ export const fetchCollection = id => dispatch => {
 }
 
 export const resetProbs = () => ({
-  type: RESET_PROBS,
+  type: types.RESET_PROBS,
 })
 
 export const requestProbs = () => ({
-  type: REQUEST_PROBS,
+  type: types.REQUEST_PROBS,
 })
 
 export const receiveProbs = probs => ({
-  type: RECEIVE_PROBS,
-  probs,
+  type: types.RECEIVE_PROBS,
+  payload: { probs },
   receivedAt: Date.now(),
 })
 
@@ -117,16 +105,16 @@ export const labelNegFlipSelected = imageSet => (dispatch, getState) => {
 }
 
 export const setActiveFeatureType = value => dispatch => {
-  dispatch({ type: SET_ACTIVE_FEATURE_TYPE, value })
+  dispatch({ type: types.SET_ACTIVE_FEATURE_TYPE, value })
   dispatch(fetchProbs())
 }
 
 export const requestFeatureTypes = () => ({
-  type: REQUEST_FEATURE_TYPES,
+  type: types.REQUEST_FEATURE_TYPES,
 })
-export const receiveFeatureTypes = value => ({
-  type: RECEIVE_FEATURE_TYPES,
-  value,
+export const receiveFeatureTypes = payload => ({
+  type: types.RECEIVE_FEATURE_TYPES,
+  payload,
   receivedAt: Date.now(),
 })
 export const fetchFeatureTypes = () => dispatch => {
@@ -137,20 +125,39 @@ export const fetchFeatureTypes = () => dispatch => {
 }
 
 export const requestTagData = () => ({
-  type: REQUEST_TAG_DATA,
+  type: types.REQUEST_TAG_DATA,
 })
-export const receiveTagData = value => ({
-  type: RECEIVE_TAG_DATA,
-  value,
+export const receiveTagData = payload => ({
+  type: types.RECEIVE_TAG_DATA,
+  payload,
   receivedAt: Date.now(),
 })
 export const fetchTagData = (tag, user) => dispatch => {
   dispatch(requestTagData())
   return fetch(`/api/tags/${tag}/${user}`)
-    .then(response => response.json())
+    .then(response => {
+      if (response.ok) {
+        AppToaster.show({
+          intent: Intent.SUCCESS,
+          icon: 'tick',
+          message: `Loaded tag: ${tag} (${user})`,
+        })
+        return response.json()
+      } else {
+        throw new Error('Server Failure')
+      }
+    })
     .then(value => dispatch(receiveTagData(value)))
     .then(() => dispatch(resetProbs()))
     .then(() => dispatch(fetchProbs()))
+    .catch(error => {
+      console.log(error)
+      AppToaster.show({
+        intent: Intent.DANGER,
+        icon: 'warning-sign',
+        message: 'Load tag failed!',
+      })
+    })
 }
 
 export const fetchProbs = () => (dispatch, getState) => {
@@ -207,7 +214,7 @@ export const saveTagData = (tag, user) => (dispatch, getState) => {
 export const labelImages = (pos, neg, unk) => (dispatch, getState) => {
   const prevLabeledPos = getPosLabelSet(getState())
   const prevLabeledNeg = getNegLabelSet(getState())
-  dispatch({ type: LABEL_IMAGES, pos, neg, unk })
+  dispatch({ type: types.LABEL_IMAGES, pos, neg, unk })
   if (prevLabeledPos.isSuperset(pos) && prevLabeledNeg.isSuperset(neg)) {
     // no need to re-fetch probs since pos and neg examples have not changed
     return
@@ -218,7 +225,7 @@ export const labelImages = (pos, neg, unk) => (dispatch, getState) => {
 export const unlabelImages = imageIds => (dispatch, getState) => {
   const state = getState()
   const prevLabeled = getPosLabelSet(state).union(getNegLabelSet(state))
-  dispatch({ type: UNLABEL_IMAGES, imageIds })
+  dispatch({ type: types.UNLABEL_IMAGES, imageIds })
   if (prevLabeled.intersect(imageIds).isEmpty()) {
     // No-op!
     return

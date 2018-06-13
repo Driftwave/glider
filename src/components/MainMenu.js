@@ -1,23 +1,19 @@
 import React from 'react'
-import { Dialog, Menu, MenuItem } from '@blueprintjs/core'
+import { connect } from 'react-redux'
+import { Menu, MenuItem } from '@blueprintjs/core'
+import { openDialog } from '../actionCreators'
+import * as dialogTypes from '../constants/dialogTypes'
 
-const MainMenu = ({ isOpenLoadTag, isOpenSaveTag, toggleLoadTag, toggleSaveTag }) => (
+const MainMenu = ({ openLoadTagDialog, openSaveTagDialog }) => (
 	<Menu>
-		<MenuItem text="Load Tag..." onClick={toggleLoadTag} />
-		<Dialog
-			icon="document-open"
-			title="Load Tag"
-			isOpen={isOpenLoadTag}
-			onClose={toggleLoadTag}
-		/>
-		<MenuItem text="Save Tag..." onClick={toggleSaveTag} />
-		<Dialog
-			icon="floppy-disk"
-			title="Save Tag"
-			isOpen={isOpenSaveTag}
-			onClose={toggleSaveTag}
-		/>
+		<MenuItem text="Load Tag..." onClick={openLoadTagDialog} />
+		<MenuItem text="Save Tag..." onClick={openSaveTagDialog} />
 	</Menu>
 )
 
-export default MainMenu
+const mapDispatchToProps = dispatch => ({
+	openLoadTagDialog: () => dispatch(openDialog(dialogTypes.LOAD_TAGS)),
+	openSaveTagDialog: () => dispatch(openDialog(dialogTypes.SAVE_TAGS)),
+})
+
+export default connect(null, mapDispatchToProps)(MainMenu)

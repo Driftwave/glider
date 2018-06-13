@@ -14,7 +14,7 @@ import {
   unlabelImages,
   labelPosFlipSelected,
   labelNegFlipSelected,
-} from '../actions'
+} from '../actionCreators'
 
 import {
   getImageProbGetter,

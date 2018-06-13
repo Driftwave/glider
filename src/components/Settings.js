@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button, Dialog } from '@blueprintjs/core'
-import Thresholds from '../containers/Thresholds'
-import FeatureTypeSelect from '../containers/FeatureTypeSelect'
+import Thresholds from '../components/Thresholds'
+import FeatureTypeSelect from '../components/FeatureTypeSelect'
 
 class Settings extends React.Component {
 	state = { isOpen: false }

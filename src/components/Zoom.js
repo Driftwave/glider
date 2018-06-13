@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { Button, ButtonGroup } from '@blueprintjs/core'
-import { increaseImageSize, decreaseImageSize } from '../actions'
+import { increaseImageSize, decreaseImageSize } from '../actionCreators'
 
 const Zoom = ({ increase, decrease }) => (
 	<ButtonGroup>

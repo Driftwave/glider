@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { RangeSlider } from '@blueprintjs/core'
-import { setThresholds } from '../actions'
+import { setThresholds } from '../actionCreators'
 import { getThresholds } from '../selectors'
 
 const Thresholds = ({ setThresholds, value }) => (

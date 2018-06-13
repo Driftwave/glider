@@ -1,24 +1,21 @@
 import { createSelector } from 'reselect'
-import {
-  UNCERTAIN,
-  POS_PROBS,
-  NEG_PROBS,
-  POS_LABEL,
-  NEG_LABEL,
-  UNK_LABEL,
-} from './containers/Panels'
+import { panelTypes } from './constants/panelConstants'
 
-export const getImageSize = state => state.imageSize
-export const getActivePanelId = state => state.activePanel.id
-export const getSelectedImageSet = state => state.activePanel.selected
+export const getActiveFeatureType = state => state.settings.featureTypes.active
+export const getFeatureTypes = state => state.settings.featureTypes.all
+export const getThresholds = state => state.settings.thresholds
+
+export const getActiveDialogType = state => state.ui.activeDialog.type
+export const getImageSize = state => state.ui.imageSize
+export const getActivePanelType = state => state.ui.activePanel.type
+export const getSelectedImageSet = state => state.ui.activePanel.selectedImages
+
 export const getImages = state => state.collection.imageIds
 export const getImageProbs = state => state.probabilities.probs
 export const getPosLabelSet = state => state.labels.pos
 export const getNegLabelSet = state => state.labels.neg
 export const getUnkLabelSet = state => state.labels.unk
-export const getThresholds = state => state.thresholds
-export const getActiveFeatureType = state => state.featureTypes.active
-export const getFeatureTypes = state => state.featureTypes.all
+
 export const getCollectionId = state => state.collection.id
 export const getUser = state => state.authentication.user
 export const isFetchingProbs = state => state.probabilities.isFetching
@@ -113,7 +110,7 @@ export const getActiveImages = createSelector(
     getPosLabelImages,
     getNegLabelImages,
     getUnkLabelImages,
-    getActivePanelId,
+    getActivePanelType,
   ],
   (
     posProbImages,
@@ -122,20 +119,20 @@ export const getActiveImages = createSelector(
     posLabelImages,
     negLabelImages,
     unkLabelImages,
-    panelId,
+    panelType,
   ) => {
-    switch (panelId) {
-      case UNCERTAIN:
+    switch (panelType) {
+      case panelTypes.UNCERTAIN:
         return uncertainImages
-      case POS_PROBS:
+      case panelTypes.POS_PROBS:
         return posProbImages
-      case NEG_PROBS:
+      case panelTypes.NEG_PROBS:
         return negProbImages
-      case POS_LABEL:
+      case panelTypes.POS_LABEL:
         return posLabelImages
-      case NEG_LABEL:
+      case panelTypes.NEG_LABEL:
         return negLabelImages
-      case UNK_LABEL:
+      case panelTypes.UNK_LABEL:
         return unkLabelImages
       default:
         return []
