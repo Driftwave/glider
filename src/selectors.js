@@ -5,9 +5,9 @@ export const getActiveFeatureType = state => state.settings.featureTypes.active
 export const getFeatureTypes = state => state.settings.featureTypes.all
 export const getThresholds = state => state.settings.thresholds
 
-export const getActiveDialogType = state => state.ui.activeDialog.type
+export const getActiveDialog = state => state.ui.activeDialog.type
 export const getImageSize = state => state.ui.imageSize
-export const getActivePanelType = state => state.ui.activePanel.type
+export const getActivePanel = state => state.ui.activePanel.type
 export const getSelectedImageSet = state => state.ui.activePanel.selectedImages
 
 export const getImages = state => state.collection.imageIds
@@ -19,6 +19,7 @@ export const getUnkLabelSet = state => state.labels.unk
 export const getCollectionId = state => state.collection.id
 export const getUser = state => state.authentication.user
 export const isFetchingProbs = state => state.probabilities.isFetching
+export const isFetchingTag = state => state.labels.isFetching
 
 export const getImageProbGetter = createSelector([getImages, getImageProbs], (images, probs) => {
   const probsMap = {}
@@ -110,7 +111,7 @@ export const getActiveImages = createSelector(
     getPosLabelImages,
     getNegLabelImages,
     getUnkLabelImages,
-    getActivePanelType,
+    getActivePanel,
   ],
   (
     posProbImages,

@@ -6,7 +6,7 @@ import { panelTypes } from './constants/panelConstants'
 function featureTypes(state = { all: [], active: null, isFetching: false }, action) {
     switch (action.type) {
         case types.SET_ACTIVE_FEATURE_TYPE:
-            return { ...state, ...action.payload }
+            return { ...state, active: action.value }
         case types.REQUEST_FEATURE_TYPES:
             return { ...state, isFetching: true }
         case types.RECEIVE_FEATURE_TYPES:

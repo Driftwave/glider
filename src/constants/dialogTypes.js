@@ -1,2 +1,2 @@
-export const LOAD_TAGS = 'LOAD_TAGS'
-export const SAVE_TAGS = 'SAVE_TAGS'
+export const LOAD_TAG = 'LOAD_TAG'
+export const SAVE_TAG = 'SAVE_TAG'

@@ -2,11 +2,11 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { Button, Dialog, Intent, Menu, MenuItem } from '@blueprintjs/core'
 import { Suggest } from '@blueprintjs/select'
-import { fetchTagData, closeDialog } from '../actionCreators'
-import { getActiveDialogType } from '../selectors'
+import { loadTagData, closeDialog } from '../actionCreators'
+import { getActiveDialog } from '../selectors'
 import * as dialogTypes from '../constants/dialogTypes'
 
-class LoadTagsDialog extends React.Component {
+class LoadTagDialog extends React.Component {
 	state = { items: [], selected: null }
 
 	componentDidMount() {
@@ -20,7 +20,7 @@ class LoadTagsDialog extends React.Component {
 
 	handleClick = () => {
 		const { tag, user } = this.state.selected
-		this.props.fetchTagData(tag, user)
+		this.props.loadTagData(tag, user)
 	}
 
 	renderSuggest = () => (
@@ -77,12 +77,12 @@ class LoadTagsDialog extends React.Component {
 }
 
 const mapStateToProps = state => ({
-	isOpen: getActiveDialogType(state) === dialogTypes.LOAD_TAGS,
+	isOpen: getActiveDialog(state) === dialogTypes.LOAD_TAG,
 })
 
 const mapDispatchToProps = dispatch => ({
-	fetchTagData: (tag, user) => dispatch(fetchTagData(tag, user)),
-	closeDialog: () => dispatch(closeDialog(dialogTypes.LOAD_TAGS)),
+	loadTagData: (tag, user) => dispatch(loadTagData(tag, user)),
+	closeDialog: () => dispatch(closeDialog(dialogTypes.LOAD_TAG)),
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(LoadTagsDialog)
+export default connect(mapStateToProps, mapDispatchToProps)(LoadTagDialog)

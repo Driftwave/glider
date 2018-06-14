@@ -12,8 +12,8 @@ const MainMenu = ({ openLoadTagDialog, openSaveTagDialog }) => (
 )
 
 const mapDispatchToProps = dispatch => ({
-	openLoadTagDialog: () => dispatch(openDialog(dialogTypes.LOAD_TAGS)),
-	openSaveTagDialog: () => dispatch(openDialog(dialogTypes.SAVE_TAGS)),
+	openLoadTagDialog: () => dispatch(openDialog(dialogTypes.LOAD_TAG)),
+	openSaveTagDialog: () => dispatch(openDialog(dialogTypes.SAVE_TAG)),
 })
 
 export default connect(null, mapDispatchToProps)(MainMenu)

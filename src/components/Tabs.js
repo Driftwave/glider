@@ -3,18 +3,18 @@ import { connect } from 'react-redux'
 import { Navbar, Tabs, Tab } from '@blueprintjs/core'
 import { predictPanelTypes, labeledPanelTypes, panelNames } from '../constants/panelConstants'
 
-import { getActivePanelType } from '../selectors'
+import { getActivePanel } from '../selectors'
 import { switchPanel } from '../actionCreators'
 
-const TabsComponent = ({ activePanelId, switchPanel }) => (
-	<Tabs selectedTabId={activePanelId} onChange={switchPanel}>
-		{predictPanelTypes.map(id => <Tab title={panelNames[id]} key={id} id={id} />)}
+const TabsComponent = ({ active, switchPanel }) => (
+	<Tabs selectedTabId={active} onChange={switchPanel}>
+		{predictPanelTypes.map(pt => <Tab title={panelNames[pt]} key={pt} id={pt} />)}
 		<Navbar.Divider />
-		{labeledPanelTypes.map(id => <Tab title={panelNames[id]} key={id} id={id} />)}
+		{labeledPanelTypes.map(pt => <Tab title={panelNames[pt]} key={pt} id={pt} />)}
 	</Tabs>
 )
 
 export default connect(
-	state => ({ activePanelType: getActivePanelType(state) }),
+	state => ({ active: getActivePanel(state) }),
 	dispatch => ({ switchPanel: panel => dispatch(switchPanel(panel)) }),
 )(TabsComponent)
