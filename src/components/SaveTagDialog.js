@@ -9,6 +9,7 @@ class SaveTagDialog extends React.Component {
 	state = { tag: '' }
 
 	handleClick = () => {
+		this.props.closeDialog()
 		this.props.saveTagData(this.state.tag, this.props.user)
 	}
 
@@ -53,6 +54,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
 	closeDialog: () => dispatch(closeDialog(dialogTypes.SAVE_TAG)),
+	saveTagData: (tag, user) => dispatch(saveTagData(tag, user)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(SaveTagDialog)

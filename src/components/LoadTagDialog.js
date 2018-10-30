@@ -20,6 +20,7 @@ class LoadTagDialog extends React.Component {
 
 	handleClick = () => {
 		const { tag, user } = this.state.selected
+		this.props.closeDialog()
 		this.props.loadTagData(tag, user)
 	}
 

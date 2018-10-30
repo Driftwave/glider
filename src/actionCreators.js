@@ -135,11 +135,11 @@ export const receiveTagData = payload => ({
 })
 export const loadTagData = (tag, user) => dispatch => {
     dispatch(requestTagData())
-    dispatch(closeDialog(dialogTypes.LOAD_TAG))
     AppToaster.show({
         intent: Intent.WARNING,
         icon: 'build',
         message: `Loading tag: ${tag} (${user})`,
+        timeout: 0,
     })
     return fetch(`/api/tags/${tag}/${user}`)
         .then(response => {
@@ -149,11 +149,6 @@ export const loadTagData = (tag, user) => dispatch => {
         .then(data => {
             dispatch(receiveTagData(data))
             dispatch(fetchProbs(false))
-            AppToaster.show({
-                intent: Intent.PRIMARY,
-                icon: 'tick',
-                message: `Tag loaded!`,
-            })
         })
         .catch(error => {
             console.log(error)
@@ -165,7 +160,7 @@ export const loadTagData = (tag, user) => dispatch => {
         })
 }
 
-export const fetchProbs = (toast = true) => (dispatch, getState) => {
+export const fetchProbs = (initialToast = true) => (dispatch, getState) => {
     const state = getState()
     const pos = getPosLabelSet(state).toArray()
     const neg = getNegLabelSet(state).toArray()
@@ -177,11 +172,12 @@ export const fetchProbs = (toast = true) => (dispatch, getState) => {
     const featureType = getActiveFeatureType(state)
 
     dispatch(requestProbs())
-    if (toast)
+    if (initialToast)
         AppToaster.show({
             intent: Intent.WARNING,
             icon: 'build',
             message: 'Training model...',
+            timeout: 0,
         })
     return fetch('/api/classify', {
         method: 'post',
@@ -194,12 +190,13 @@ export const fetchProbs = (toast = true) => (dispatch, getState) => {
         .then(data => {
             dispatch(clearSelected())
             dispatch(receiveProbs(data))
-            if (toast)
-                AppToaster.show({
-                    intent: Intent.PRIMARY,
-                    icon: 'tick',
-                    message: `Model trained!`,
-                })
+            AppToaster.clear()
+            AppToaster.show({
+                intent: Intent.PRIMARY,
+                icon: 'tick',
+                message: `Success!`,
+                timeout: 1000,
+            })
         })
         .catch(error => {
             console.log(error)
@@ -227,6 +224,7 @@ export const saveTagData = (tag, user) => (dispatch, getState) => {
                     intent: Intent.PRIMARY,
                     icon: 'tick',
                     message: 'Saved Tag!',
+                    timeout: 1500,
                 })
             } else throw new Error('Server Failure')
         })
